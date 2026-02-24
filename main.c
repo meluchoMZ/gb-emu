@@ -4,6 +4,8 @@
  */
 
 #include "ppu.h"
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,7 +15,7 @@ int main(int argc, char *argv[])
 	FILE *logFile = stderr;
 	struct PPU ppu;
 	
-	if (initPPU(&ppu, logFile) > 0) {
+	if (!initPPU(&ppu, logFile)) {
 		return EXIT_FAILURE;
 	}
 

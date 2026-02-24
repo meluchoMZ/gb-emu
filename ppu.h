@@ -7,6 +7,7 @@
 #define __PPU_H_
 
 #include <SDL2/SDL.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 // Screen properties
@@ -47,7 +48,7 @@ struct PPU
  * @param ppu a PPU pointer to the logFile
  * @return 1 if error, 0 if success
  */
-int initPPU(struct PPU *ppu, FILE *logFile);
+bool initPPU(struct PPU *ppu, FILE *logFile);
 
 /**
  * Renders a frame

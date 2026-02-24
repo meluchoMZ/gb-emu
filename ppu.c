@@ -4,11 +4,12 @@
  */
 
 #include "ppu.h"
+
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-int initPPU(struct PPU *ppu, FILE *logFile)
+bool initPPU(struct PPU *ppu, FILE *logFile)
 {
 	int windowFlags = 0;
 	int rendererFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
@@ -22,7 +23,7 @@ int initPPU(struct PPU *ppu, FILE *logFile)
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
 		fprintf(ppu->logFile, "Error initializing SDL subsystem: %s\n", SDL_GetError());
-		return 1;
+		return false;
 	}
 
 	ppu->window = SDL_CreateWindow("GBemu",
@@ -32,14 +33,14 @@ int initPPU(struct PPU *ppu, FILE *logFile)
 
 	if (ppu->window == NULL) {
 		fprintf(ppu->logFile, "Error creating SDL window: %s\n", SDL_GetError());
-		return 1;
+		return false;
 	}
 
 	ppu->renderer = SDL_CreateRenderer(ppu->window, -1, rendererFlags);
 
 	if (ppu->renderer == NULL) {
 		fprintf(ppu->logFile, "Error creating SDL renderer: %s\n", SDL_GetError());
-		return 1;
+		return false;
 	}
 
 	fprintf(ppu->logFile, "Initializing pixel buffer with size %ld:\n", sizeof(uint32_t[computedWidth][computedHeight]));
@@ -57,7 +58,7 @@ int initPPU(struct PPU *ppu, FILE *logFile)
 		}
 	}
 
-	return 0;
+	return true;
 }
 
 void finalizePPU(struct PPU *ppu) 

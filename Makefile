@@ -1,5 +1,5 @@
 TARGET = gb-emu
-SRC = memory.c cpu.c ppu.c main.c
+SRC = io.c memory.c cpu_instructions.c cpu.c ppu.c main.c
 
 CC = gcc
 
@@ -15,7 +15,7 @@ all: $(TARGET)
 
 $(TARGET): $(SRC)
 	@echo "Compiling $(TARGET)..."
-	$(CC) $(SRC) $(CFLAGS) -o $(TARGET) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(TARGET) $(SRC)
 	@echo "Compilation successful. Run with: ./$(TARGET)"
 
 clean:
