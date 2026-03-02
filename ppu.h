@@ -54,7 +54,7 @@ bool initPPU(struct PPU *ppu, FILE *logFile);
  * Renders a frame
  * @param ppu a pointer to the ppu 
  */
-void renderFrame(struct PPU *ppu);
+void renderFrame(struct PPU *ppu, const char *gameTitle);
 
 
 /**

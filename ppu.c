@@ -11,6 +11,16 @@
 
 bool initPPU(struct PPU *ppu, FILE *logFile)
 {
+	if (logFile == NULL) {
+		fprintf(stderr, "[PPU] Could not initialize PPU: logFile is NULL");
+		return false;
+	}
+
+	if (ppu == NULL) {
+		fprintf(logFile, "[PPU] Could not initialize PPU: ppu is NULL");
+		return false;
+	}
+
 	int windowFlags = 0;
 	int rendererFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
 	int computedWidth = SCREEN_WIDTH * SCALE_FACTOR;
@@ -80,13 +90,13 @@ void finalizePPU(struct PPU *ppu)
 	SDL_Quit();
 }
 
-void updateFramesPerSecond(struct PPU *ppu)
+void updateFramesPerSecond(struct PPU *ppu, const char * gameTitle)
 {
 	Uint64 currentFrameCounter = SDL_GetTicks();
 	ppu->fps++;
 	if (currentFrameCounter > ppu->frameCounter + 1000) {
 		char newWindowTitle[16] = {'\0'};
-		sprintf(newWindowTitle, "GBemu FPS: %d", ppu->fps);
+		sprintf(newWindowTitle, "%s - FPS: %d", gameTitle, ppu->fps);
 		SDL_SetWindowTitle(ppu->window, newWindowTitle); 
 		ppu->frameCounter = currentFrameCounter;
 		ppu->fps = 0;
@@ -94,7 +104,7 @@ void updateFramesPerSecond(struct PPU *ppu)
 	return;
 }
 
-void renderFrame(struct PPU *ppu)
+void renderFrame(struct PPU *ppu, const char *gameTitle)
 {
 	int texturePitch = 0;
 	void *texturePixels = NULL;
@@ -132,7 +142,7 @@ void renderFrame(struct PPU *ppu)
 	SDL_RenderPresent(ppu->renderer);
 
 	SDL_DestroyTexture(texture);
-	updateFramesPerSecond(ppu);
+	updateFramesPerSecond(ppu, gameTitle);
 	return;
 }
 

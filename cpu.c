@@ -16,6 +16,11 @@ bool initCPU(struct CPU *cpu, FILE *logFile)
 		return false;
 	}
 
+	if (cpu == NULL) {
+		fprintf(logFile, "[CPU] Error initializing CPU: cpu is NULL");
+		return false;
+	}
+
 	cpu->logFile = logFile;
 
 	// init Program Counter
@@ -23,6 +28,7 @@ bool initCPU(struct CPU *cpu, FILE *logFile)
 	// Nintendo logo starts at 0x104
 	cpu->PC = 0x100;
 
+	// Interrupts are disabled on startup
 	cpu->IME = false;
 
 	// init cpu operations

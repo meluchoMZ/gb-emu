@@ -16,7 +16,7 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	@echo "Compiling $(TARGET)..."
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(TARGET) $(SRC)
-	@echo "Compilation successful. Run with: ./$(TARGET)"
+	@echo "Compilation successful. Run with: ./$(TARGET) <game-ROM>"
 
 clean:
 	@echo "Cleaning up..."

@@ -89,4 +89,10 @@ struct CPU
  */
 bool initCPU(struct CPU *cpu, FILE *logFile);
 
+/**
+ * Finalizes CPU subsystem
+ * @param cpu a pointer to a struct CPU instance
+ */
+void finalizeCPU(struct CPU *cpu);
+
 #endif //__CPU_H_
