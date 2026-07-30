@@ -81,33 +81,32 @@ void readCartridgeMetadata(struct Cartridge *cartridge)
 	fread(&cartridge->globalChecksum, 1, GLOBAL_CHECKSUM_END - GLOBAL_CHECKSUM_START + 1, cartridge->romFile);
 }
 
+/**
+ * Loads a ROM ONLY cartridge into memory
+ */
+bool loadRomOnlyCartridgeIntoMemory(struct Cartridge *cartridge, struct MMAP *mmap)
+{
+	// This type of cartridge do not require baking, so we map it directly from the
+	// start of the memory map up to the start of the VRAM data
+	rewind(cartridge->romFile);
+	size_t readBytes = fread(mmap->ROMBank, 1, VRAM - 1, cartridge->romFile);
+	// we check that the read bytes match the size of the cartridge
+	return readBytes == 0x7FFF;
+}
+
+/**
+ * Loads a cartridge into memory taking into account the cartridge type
+ */
 bool loadCartridgeIntoMemory(struct Cartridge *cartridge, struct MMAP *mmap)
 {
-	fprintf(mmap->logFile, "[BOOT] Loading ROM data into memory\n");
-	fseek(cartridge->romFile, 0, SEEK_END);
-	size_t romSize = ftell(cartridge->romFile);
-	rewind(cartridge->romFile);
-	// The cartridge size can be variable up to 8MB
-	// We use heap memory to avoid possible stack overflows
-	uint8_t *romBuffer = malloc(romSize);
-	if (romBuffer == NULL) {
-		fprintf(mmap->logFile, "[BOOT] Cannot allocate ROM buffer memory%s\n",
-				strerror(errno));
-		return false;
+	switch (cartridge->cartridgeType)
+	{
+		case CT_ROM_ONLY:
+			return loadRomOnlyCartridgeIntoMemory(cartridge, mmap);
+		default:
+			fprintf(stderr, "[BOOT] Cartridge type 0x%02hhX is currently not supported\n", cartridge->cartridgeType);
+			return false;
 	}
-	size_t readBytes = fread(romBuffer, 1, romSize, cartridge->romFile);
-	if (readBytes != romSize) {
-		fprintf(mmap->logFile, "[BOOT] Error reading ROM file\n");
-		free(romBuffer);
-		return false;
-	}
-	for (uint16_t offset = ROM; offset < VRAM; ++offset) {
-		mmap->memoryBuffer[offset] = romBuffer[offset];
-	}
-	free(romBuffer);
-	romBuffer = NULL;
-	fprintf(mmap->logFile, "[BOOT] Loaded 32 kB of data from the cartridge to 0x0000 - 0x7FFF\n");
-	return true;
 }
 
 bool startPowerUpSequence(struct CPU *cpu, struct MMAP *mmap, struct Cartridge *cartridge)
@@ -118,6 +117,10 @@ bool startPowerUpSequence(struct CPU *cpu, struct MMAP *mmap, struct Cartridge *
 	}
 	readCartridgeMetadata(cartridge);
 	printCartridgeInformation(cartridge);
+	if (!loadCartridgeIntoMemory(cartridge, mmap)) {
+		return false;
+	}
+	fprintf(stdout, "[BOOT] Loaded cartridge into memory\n");
 	return true;
 }
 

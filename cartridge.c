@@ -619,7 +619,7 @@ char * getNewLicenseeCode(uint8_t oldLicenseeCode, uint16_t newLicenseeCode)
 
 char * sgbFlagToString(uint8_t sgbFlag)
 {
-	return sgbFlag == SGB_FLAG ? "yes\0" : "no \0";
+	return sgbFlag == SGB_FLAG ? "yes\0" : "no\0";
 }
 
 void printCartridgeInformation(struct Cartridge *cartridge)
@@ -645,7 +645,7 @@ void printCartridgeInformation(struct Cartridge *cartridge)
 	fprintf(cartridge->logFile, "Destination code: %s\n", destinationCodeToString(cartridge->destinationCode));
 	fprintf(cartridge->logFile, "Old Licensee Code: %s\n", getOldLicenseeCode(cartridge->oldLicenseeCode));
 	fprintf(cartridge->logFile, "ROM version: %d\n", cartridge->romVersion);
-	fprintf(cartridge->logFile, "Header checksum value: %x\n", cartridge->headerChecksum);
-	fprintf(cartridge->logFile, "Global checkshum value: %2x\n", cartridge->globalChecksum);
+	fprintf(cartridge->logFile, "Header checksum value: 0x%02hhX\n", cartridge->headerChecksum);
+	fprintf(cartridge->logFile, "Global checkshum value: 0x%02hhX\n", cartridge->globalChecksum);
 }
 
