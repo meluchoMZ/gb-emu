@@ -77,9 +77,12 @@ struct CPU
 
 	// Enable interrupt flag
 	bool IME;
+	// Enable extendedInstructionSet
+	bool cbPrefix;
 
 	// Function pointer matrix to the instruction set
 	CPU_OP instructionSet[16][16];
+	CPU_OP extendedInstructionSet[16][16];
 };
 
 /**

@@ -28,7 +28,7 @@ const char * processStartupArguments(int argc, char *argv[], FILE *logFile);
  * @param path the path to the game ROM location
  * @param logFile a pointer to the log file
  */
-FILE * loadCartridge(const char *path, FILE *logFile);
+//FILE * loadCartridge(const char *path, FILE *logFile);
 
 /**
  * Closes the game ROM file

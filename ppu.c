@@ -68,6 +68,25 @@ bool initPPU(struct PPU *ppu, FILE *logFile)
 		}
 	}
 
+	ppu->debugWindow = SDL_CreateWindow("Tile VRAM Debug",
+			// offset by 20 pixels to the left of the emulator window
+			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			TILE_DEBUG_WINDOW_WIDTH * SCALE_FACTOR,
+			TILE_DEBUG_WINDOW_HEIGHT * SCALE_FACTOR, 
+			0);
+
+	if (ppu->debugWindow == NULL) {
+		fprintf(ppu->logFile, "Error creating SDL window (debug): %s\n", SDL_GetError());
+		return false;
+	}
+
+	ppu->debugRenderer = SDL_CreateRenderer(ppu->debugWindow, -1, rendererFlags);
+
+	if (ppu->debugRenderer == NULL) {
+		fprintf(ppu->logFile, "Error creating SDL renderer (debug): %s\n", SDL_GetError());
+		return false;
+	}
+
 	return true;
 }
 
@@ -85,6 +104,14 @@ void finalizePPU(struct PPU *ppu)
 
 	if (ppu->window != NULL) {
 		SDL_DestroyWindow(ppu->window);
+	}
+
+	if (ppu->debugRenderer != NULL) {
+		SDL_DestroyRenderer(ppu->debugRenderer);
+	}
+
+	if (ppu->debugWindow != NULL) {
+		SDL_DestroyWindow(ppu->debugWindow);
 	}
 
 	SDL_Quit();
@@ -141,7 +168,17 @@ void renderFrame(struct PPU *ppu, const char *gameTitle)
 	SDL_RenderCopy(ppu->renderer, texture, NULL, NULL);
 	SDL_RenderPresent(ppu->renderer);
 
+	SDL_RenderClear(ppu->debugRenderer);
+	SDL_RenderPresent(ppu->debugRenderer);
+
 	SDL_DestroyTexture(texture);
+	// variables to store current emulator window
+	int emulatorWindowPositionX;
+	int emulatorWindowPositionY;
+	SDL_GetWindowPosition(ppu->window, &emulatorWindowPositionX, &emulatorWindowPositionY);
+	SDL_SetWindowPosition(ppu->debugWindow, 
+			emulatorWindowPositionX + (SCREEN_WIDTH * SCALE_FACTOR) + 20, emulatorWindowPositionY);
+
 	updateFramesPerSecond(ppu, gameTitle);
 	return;
 }

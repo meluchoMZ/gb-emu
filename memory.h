@@ -10,6 +10,19 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define IER    0xFFFF
+#define HIRAM  0xFF80
+#define EUIO2  0xFF4C
+#define IOPORT 0xFF00
+#define EUIO   0xFEA0 
+#define SAM    0xFE00
+#define ERAM   0xE000
+#define RAM    0xC000
+#define SRAM   0xA000
+#define VRAM   0x8000
+#define SROM   0x4000
+#define ROM    0x0000
+
 struct MMAP
 {
 	FILE *logFile;
@@ -56,13 +69,5 @@ uint8_t readMemory(struct MMAP *mmap, uint16_t address);
  * @param data a byte of data to write in the memory at the given address
  */ 
 void writeMemory(struct MMAP *mmap, uint16_t address, uint8_t data);
-
-/**
- * Loads the cartridge data into the Game Boy memory
- * @param mmap a pointer to a MMAP structure
- * @param cartridge a poitner to the ROM file
- * @return true if the load was successfull, false otherwise
- */
-bool loadCartridgeIntoMemory(struct MMAP *mmap, FILE *cartridge);
 
 #endif //__MEMORY_H_

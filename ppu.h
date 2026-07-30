@@ -11,6 +11,8 @@
 #include <stdio.h>
 
 // Screen properties
+#define SCREEN_BUFFER_WIDTH 256
+#define SCREEN_BUFFER_HEIGHT 256
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
 #define SCALE_FACTOR 4 // scale it up to 4 on testing
@@ -20,6 +22,9 @@
 #define TILE_LIGHT_GRAY 0xFFAAAAAA
 #define TILE_DARK_GRAY  0xFF555555
 #define TILE_BLACK      0xFF000000
+
+#define TILE_DEBUG_WINDOW_WIDTH 24
+#define TILE_DEBUG_WINDOW_HEIGHT 16
 
 /**
  * Defines the PixelProccessingUnit
@@ -35,13 +40,52 @@
  */
 struct PPU
 {
+	uint16_t      fps;
+	uint8_t       scrollX;
+	uint8_t       scrollY;
+	uint8_t       windowPosX;
+	uint8_t       windowPosY;
+	uint8_t       lcdcRegister;
+	uint32_t     *pixelBuffer;
+	FILE         *logFile;
 	SDL_Window   *window;
 	SDL_Renderer *renderer;
-	FILE         *logFile;
-	uint32_t     *pixelBuffer;
+	SDL_Window   *debugWindow;
+	SDL_Renderer *debugRenderer;
 	Uint64        frameCounter;
-	unsigned int  fps;
 };
+
+/**
+ * Defines each one of the object attribute entries of the 
+ * Object Attribute Memory (OAM), located at $FE00-FE9F
+ */
+struct AttributeEntry
+{
+	// Vertical position
+	uint8_t yPosition;
+	// Horizontal position
+	uint8_t xPosition;
+	// Tile index
+	uint8_t tileIndex;
+	/**
+	 * Attribute flags
+	 * +----------+--------+--------+-------------+------+-------------+
+	 * |     7    |    6   |    5   |      4      |   3  |   2  -  0   |
+	 * +----------+--------+--------+-------------+------+-------------+
+	 * | Priority | Y flip | X flip | DMG palette | Bank | CGB palette |
+	 * +----------+--------+--------+-------------+------+-------------+
+	 */
+	struct 
+	{
+		uint8_t cgbPalette : 3;
+		uint8_t bank : 1;
+		uint8_t dmgPalette : 1;
+		uint8_t xFlip : 1;
+		uint8_t yFlip : 1;
+		uint8_t priority: 1;
+	} flags;
+};
+
 
 /**
  * Initializes all PPU subsystems

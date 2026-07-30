@@ -73,6 +73,15 @@ void op0x03(struct CPU *cpu, struct MMAP *mmap)
 	cpu->PC++;
 }
 
+void op0x06(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LD B, n
+	// Loads the data n into B register
+	cpu->PC++;
+	uint8_t n = readMemory(mmap, cpu->PC++);
+	cpu->B = n;
+}
+
 void op0x08(struct CPU *cpu, struct MMAP *mmap)
 {
 	// LD (nn), SP
@@ -152,6 +161,29 @@ void op0x11(struct CPU *cpu, struct MMAP *mmap)
 	cpu->DE = data;
 }
 
+void op0x17(struct CPU *cpu, struct MMAP *mmap)
+{
+	// RLA
+	// Rotates the accumulator left through the carry flag
+	IGNORE(mmap);
+	cpu->A = cpu->A << 1;
+	cpu->A = cpu->A | (cpu->F.C & 0x01);
+	cpu->F.Z = 0;
+	cpu->F.N = 0;
+	cpu->F.H = 0;
+	cpu->F.C = (cpu->A >> 8) & 0x01;
+	cpu->PC++;
+}
+
+void op0x1A(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LD A, (DE)
+	// Load into A register the data pointed by DE register
+	uint8_t data = readMemory(mmap, cpu->DE);
+	cpu->A = data;
+	cpu->PC++;
+}
+
 void op0x1F(struct CPU *cpu, struct MMAP *mmap)
 {
 	// RRA
@@ -168,7 +200,59 @@ void op0x1F(struct CPU *cpu, struct MMAP *mmap)
 	cpu->PC++;
 }
 
-/* 0x3X*/
+/* 0x2X */
+
+void op0x20(struct CPU *cpu, struct MMAP *mmap)
+{
+	// JR NZ, e
+	// Conditional relative jump to e if NZ is met
+	cpu->PC++;
+	uint8_t offset = readMemory(mmap, cpu->PC++);
+	if (!cpu->F.Z) {
+		cpu->PC = cpu->PC + offset;
+	}
+}
+
+void op0x21(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LD HL, nn
+	// Loads the data nn into HL register
+	cpu->PC++;
+	uint8_t lsbData = readMemory(mmap, cpu->PC++);
+	uint8_t msbData = readMemory(mmap, cpu->PC++);
+	cpu->HL = (((uint16_t) msbData) << 8) | lsbData;
+}
+
+void op0x26(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LD H, n
+	// Loads the data n into H register
+	cpu->PC++;
+	uint8_t data = readMemory(mmap, cpu->PC++);
+	cpu->H = data;
+}
+
+/* 0x3X */
+
+void op0x31(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LD SP, nn
+	// Loads 16 bits data into Stack Pointer
+	cpu->PC++;
+	uint8_t newSpLsb = readMemory(mmap, cpu->PC++);
+	uint8_t newSpMsb = readMemory(mmap, cpu->PC++);
+	cpu->SP = (((uint16_t) newSpMsb) << 8) | newSpLsb;
+}
+
+void op0x32(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LD (HL-), A
+	// Loads the data from A register to the address HL
+	// HL value is then decremented after memory write
+	writeMemory(mmap, cpu->HL, cpu->A);
+	cpu->HL--;
+	cpu->PC++;
+}
 
 void op0x33(struct CPU *cpu, struct MMAP *mmap)
 {
@@ -185,6 +269,17 @@ void op0x3E(struct CPU *cpu, struct MMAP *mmap)
 	// Loads the data n to the A register
 	cpu->PC++;
 	cpu->A = readMemory(mmap, cpu->PC++);
+}
+
+/* 0x4X */
+
+void op0x4F(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LD C, A
+	// Loads the data from A register into C register 
+	IGNORE(mmap);
+	cpu->C = cpu->A;
+	cpu->PC++;
 }
 
 /* 0x6X */
@@ -234,6 +329,14 @@ void op0x73(struct CPU *cpu, struct MMAP *mmap)
 	// LD (HL), E
 	// write the data in E to the address pointed by HL
 	writeMemory(mmap, cpu->HL, cpu->E);
+	cpu->PC++;
+}
+
+void op0x77(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LD HL, A
+	// Loads the data A into memory at address pointed by HL
+	writeMemory(mmap, cpu->HL, cpu->A);
 	cpu->PC++;
 }
 
@@ -314,6 +417,21 @@ void op0x9F(struct CPU *cpu, struct MMAP *mmap)
 	cpu->PC++;
 }
 
+/* 0xAX */
+
+void op0xAF(struct CPU *cpu, struct MMAP *mmap)
+{
+	// XOR A
+	// XOR between A register and A register and updates A register
+	IGNORE(mmap);
+	cpu->A = cpu->A ^ cpu->A;
+	cpu->F.Z = cpu->A == 0;
+	cpu->F.N = 0;
+	cpu->F.H = 0;
+	cpu->F.C = 0;
+	cpu->PC++;
+}
+
 /* 0xBX */
 
 void op0xB9(struct CPU *cpu, struct MMAP *mmap)
@@ -342,19 +460,64 @@ void op0xBB(struct CPU *cpu, struct MMAP *mmap)
 
 /* 0xCX */
 
+void op0xC1(struct CPU *cpu, struct MMAP *mmap)
+{
+	// RET NZ
+	// Conditional return if NZ is met
+	if (!cpu->F.Z) {
+		uint8_t lsb = readMemory(mmap, cpu->SP++);
+		uint8_t msb = readMemory(mmap, cpu->SP++);
+		cpu->PC = (((uint16_t) msb) << 8) | lsb;
+	} else {
+		cpu->PC++;
+	}
+}
+
+void op0xC5(struct CPU *cpu, struct MMAP *mmap)
+{
+	// PUSH BC
+	// Pushes data from BC to the stack memory
+	cpu->SP--;
+	writeMemory(mmap, cpu->SP--, (cpu->BC & 0xFF00) >> 8);
+	writeMemory(mmap, cpu->SP, cpu->BC & 0x00FF);
+	cpu->PC++;
+}
+
+void op0xCB(struct CPU *cpu, struct MMAP *mmap)
+{
+	// CB prefix, enables CB instruction set
+	IGNORE(mmap);
+	cpu->cbPrefix = true;
+	cpu->PC++;
+}
+
 void op0xCC(struct CPU *cpu, struct MMAP *mmap)
 {
 	// CALL Z, nn
 	// Condition function call
 	cpu->PC++;
+	// the immediate operand is always processed
+	uint8_t newPcLsb = readMemory(mmap, cpu->PC++);
+	uint8_t newPcMsb = readMemory(mmap, cpu->PC++);
 	// the condition is true if the Zero bit is active
-	if (cpu->F.Z == 0x1) {
-		uint8_t newPcLsb = readMemory(mmap, cpu->PC++);
-		uint8_t newPcMsb = readMemory(mmap, cpu->PC++);
+	if (cpu->F.Z) {
 		uint16_t newPC = (((uint16_t) newPcMsb) << 8) | newPcLsb;
 		cpu->SP--;
 		cpu->PC = newPC;
 	}
+}
+
+void op0xCD(struct CPU *cpu, struct MMAP *mmap)
+{
+	// CALL nn
+	// Non condition jump to immediate nn
+	cpu->PC++;
+	uint8_t newPcLsb = readMemory(mmap, cpu->PC++);
+	uint8_t newPcMsb = readMemory(mmap, cpu->PC++);
+	cpu->SP--;
+	writeMemory(mmap, cpu->SP--, newPcMsb);
+	writeMemory(mmap, cpu->SP, newPcLsb);
+	cpu->PC = (((uint16_t) newPcMsb) << 8) | newPcLsb;
 }
 
 void op0xCE(struct CPU *cpu, struct MMAP *mmap)
@@ -409,6 +572,34 @@ void op0xDD(struct CPU *cpu, struct MMAP *mmap)
 
 /* 0xEX */
 
+void op0xE0(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LDH (n), A
+	// Load from accumulator to 0xFF00 + n
+	cpu->PC++;
+	uint8_t n = readMemory(mmap, cpu->PC++);
+	writeMemory(mmap, 0xFF00 | n, cpu->A);
+}
+
+void op0xE1(struct CPU *cpu, struct MMAP *mmap)
+{
+	// POP HL
+	// Pops data from the stack memory to HL register
+	uint8_t lsb = readMemory(mmap, cpu->SP++);
+	uint8_t msb = readMemory(mmap, cpu->SP++);
+	cpu->HL = (((uint16_t) msb) << 8) | lsb;
+	cpu->PC++;
+}
+
+void op0xE2(struct CPU *cpu, struct MMAP *mmap)
+{
+	// LDH (C), A
+	// Loads into memory the value from A into 0xFF00 + C offset
+	cpu->PC++;
+	uint8_t offset = readMemory(mmap, cpu->PC++);
+	writeMemory(mmap, 0xFF00 | offset, cpu->A);
+}
+
 void op0xE6(struct CPU *cpu, struct MMAP *mmap)
 {
 	// AND n
@@ -438,4 +629,53 @@ void op0xED(struct CPU *cpu, struct MMAP *mmap)
 	// No operation should end up here
 	IGNORE(cpu);
 	IGNORE(mmap);
+}
+
+/* CB prefixed */
+
+/* CB 0x1X */
+
+void opCB0x11(struct CPU *cpu, struct MMAP *mmap)
+{
+	// RL C
+	// Rotates the C register left througt the carry flag
+	IGNORE(mmap);
+	cpu->C = cpu->C << 1;
+	cpu->C = cpu->C | (cpu->F.C & 0x01);
+	cpu->F.Z = cpu->C == 0x00;
+	cpu->F.N = 0;
+	cpu->F.H = 0;
+	cpu->F.C = (cpu->F.C >> 8) & 0x01;
+	cpu->PC++;
+}
+
+/* CB 0x7X */
+
+void opCB0x7C(struct CPU *cpu, struct MMAP *mmap)
+{
+	// BIT 7, H
+	// Tests bit 7 of register H
+	// The zero flag is set to 1 if the bit 7 is zero
+	IGNORE(mmap);
+	cpu->F.Z = (cpu->H & 0x80) == 0;
+	cpu->F.Z = 0;
+	cpu->F.H = 0;
+	cpu->PC++;
+}
+
+void executeCPUInstruction(struct CPU *cpu, struct MMAP *mmap)
+{
+	uint8_t instruction = readMemory(mmap, cpu->PC);
+	uint8_t rowId = (instruction >> 4) & 0x0F;
+	uint8_t columnId = instruction & 0x0F;
+	if (cpu->cbPrefix) {
+		cpu->cbPrefix = false;
+		fprintf(cpu->logFile, "[PC: %02X] Executing CB prefixed instruction %02X, [%X][%X]\n", 
+				cpu->PC, instruction, rowId, columnId);
+		cpu->extendedInstructionSet[rowId][columnId](cpu, mmap);	
+	} else {
+		fprintf(cpu->logFile, "[PC: %02X] Executing instruction %02X, [%X][%X]\n", 
+				cpu->PC, instruction, rowId, columnId);
+		cpu->instructionSet[rowId][columnId](cpu, mmap);
+	}
 }

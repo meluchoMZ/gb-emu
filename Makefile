@@ -1,5 +1,5 @@
 TARGET = gb-emu
-SRC = io.c memory.c cpu_instructions.c cpu.c ppu.c main.c
+SRC = cartridge.c io.c memory.c cpu_instructions.c cpu.c ppu.c boot.c main.c
 
 CC = gcc
 
