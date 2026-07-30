@@ -23,6 +23,19 @@
 #define SROM   0x4000
 #define ROM    0x0000
 
+// DMG memory mapped IO registers
+// Color Game Boy (CGB) registers will not be implemented yet
+#define R_JOYPAD_INPUT       0xFF00
+#define R_SERIAL_TRANSFER    0xFF01
+#define R_TIMER              0xFF04
+#define R_INTERRUPTS         0xFF0F
+#define R_AUDIO              0xFF10
+#define R_WAVE_PATTERN       0xFF3F
+#define R_LCD_CONTROL        0xFF40
+#define R_DMA_TRANFER        0xFF46
+#define R_BOOT_ROM_MAPPING   0xFF50
+
+
 struct MMAP
 {
 	FILE *logFile;

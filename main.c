@@ -16,15 +16,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void processingLoop(struct CPU *cpu, struct MMAP *mmap)
-{
-	while (true) 
-	{
-		executeCPUInstruction(cpu, mmap);
-	}
-	fprintf(stderr, "[PC: %02X] - End\n", cpu->PC);
-}
-
 int main(int argc, char *argv[]) 
 {
 	FILE *logFile = stderr;
@@ -64,25 +55,16 @@ int main(int argc, char *argv[])
 
 	startPowerUpSequence(&cpu, &mmap, &cartridge);
 
-	//char gameName[16];
-	//fprintf(logFile, "Game: ");
-	//for (uint16_t offset = 0x0134; offset < 0x0143; ++offset) {
-	//	gameName[offset - 0x0134] = mmap.memoryBuffer[offset];
-	//}
-	//fprintf(logFile, "%s\n", gameName);
-
-	//fprintf(logFile, "Nintendo scrolling logo: ");
-	//for (uint16_t offset = 0x0104; offset < 0x0134; ++offset) {
-	//	fprintf(logFile, "%02X", mmap.memoryBuffer[offset]);
-	//}
-	//fprintf(logFile, "\n");
-
-	//while (!proccessInput()) 
-	//{
-	//	renderFrame(&ppu, gameName);
-	//	usleep(16);
-	//}
-	//processingLoop(&cpu, &mmap);
+	char gameTitle[16];
+	for (uint8_t i = 0; i < 16; ++i) {
+		gameTitle[i] = cartridge.title[i];
+	}
+	while (!proccessInput())
+	{
+		executeCPUInstruction(&cpu, &mmap);
+		renderFrame(&ppu, gameTitle);
+		usleep(16);
+	}
 
 
 	finalizePPU(&ppu);

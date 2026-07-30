@@ -38,6 +38,10 @@ bool initMemoryMap(struct MMAP *mmap, FILE *logFile)
 	mmap->ROMBank                 = &mmap->memoryBuffer[ROM];
 
 	mmap->bootRomEnabled = true;
+
+	// set initial values for the IO registers
+	mmap->memoryBuffer[R_JOYPAD_INPUT] = 0x0F;
+	mmap->memoryBuffer[R_BOOT_ROM_MAPPING] = 0X00;
 	
 	return true;
 }
@@ -45,14 +49,32 @@ bool initMemoryMap(struct MMAP *mmap, FILE *logFile)
 uint8_t readMemory(struct MMAP *mmap, uint16_t address)
 {
 	// the boot room is a switchable bank
-	if (address < 0x0100 && mmap->bootRomEnabled) {
+	if (mmap->bootRomEnabled) {
 		return mmap->bootRom[address];
 	}
-	return mmap->memoryBuffer[address];
+	switch (address)
+	{
+		// Handle reads from IO registers
+		case R_JOYPAD_INPUT:
+			// temporary return hardcoded no buttons pressed while
+			// the joypad support is not developed
+			return 0x0F;
+		default:
+			return mmap->memoryBuffer[address];
+	}
 }
 
 void writeMemory(struct MMAP *mmap, uint16_t address, uint8_t data)
 {
-	mmap->memoryBuffer[address] = data;
+	switch (address)
+	{
+		// Handle writes to IO registers
+		case R_BOOT_ROM_MAPPING:
+			mmap->bootRomEnabled = false;
+			mmap->memoryBuffer[address] = data;
+			return;
+		default:
+			mmap->memoryBuffer[address] = data;
+	}
 }
 

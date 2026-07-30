@@ -22,19 +22,4 @@ void printHelp();
  * @return the path to the game rom, NULL otherwise
  */
 const char * processStartupArguments(int argc, char *argv[], FILE *logFile);
-
-/**
- * Gives a pointer to read the game ROM file
- * @param path the path to the game ROM location
- * @param logFile a pointer to the log file
- */
-//FILE * loadCartridge(const char *path, FILE *logFile);
-
-/**
- * Closes the game ROM file
- * @param cartridge a FILE pointer to the game ROM file
- * @param logFile a pointer to the log file
- */
-void unloadCartridge(FILE *cartridge, FILE *logFile);
-
 #endif // __IO_H_
