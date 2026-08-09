@@ -646,6 +646,6 @@ void printCartridgeInformation(struct Cartridge *cartridge)
 	fprintf(cartridge->logFile, "Old Licensee Code: %s\n", getOldLicenseeCode(cartridge->oldLicenseeCode));
 	fprintf(cartridge->logFile, "ROM version: %d\n", cartridge->romVersion);
 	fprintf(cartridge->logFile, "Header checksum value: 0x%02hhX\n", cartridge->headerChecksum);
-	fprintf(cartridge->logFile, "Global checkshum value: 0x%02hhX\n", cartridge->globalChecksum);
+	fprintf(cartridge->logFile, "Global checksum value: 0x%02hhX\n", cartridge->globalChecksum);
 }
 

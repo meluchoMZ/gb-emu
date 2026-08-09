@@ -5,7 +5,6 @@
 
 #include "boot.h"
 #include "cartridge.h"
-#include "cpu.h"
 #include "memory.h"
 
 #include <errno.h>
@@ -109,7 +108,7 @@ bool loadCartridgeIntoMemory(struct Cartridge *cartridge, struct MMAP *mmap)
 	}
 }
 
-bool startPowerUpSequence(struct CPU *cpu, struct MMAP *mmap, struct Cartridge *cartridge)
+bool startPowerUpSequence(struct MMAP *mmap, struct Cartridge *cartridge)
 {
 	if (!loadBootRom(mmap)) {
 		return false;

@@ -7,7 +7,7 @@ CC = gcc
 SDL_CFLAGS = $(shell pkg-config --cflags sdl2)
 SDL_LIBS = $(shell pkg-config --libs sdl2)
 
-CFLAGS = -Wall -Wextra -Wpedantic -O3 $(SDL_CFLAGS) -g
+CFLAGS = -Wall -Wextra -Werror -Wpedantic $(SDL_CFLAGS) -g
 
 LDFLAGS = $(SDL_LIBS) -lm
 

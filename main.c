@@ -53,21 +53,25 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	startPowerUpSequence(&cpu, &mmap, &cartridge);
-
-	char gameTitle[16];
-	for (uint8_t i = 0; i < 16; ++i) {
-		gameTitle[i] = cartridge.title[i];
-	}
-	while (!proccessInput())
-	{
-		executeCPUInstruction(&cpu, &mmap);
+	if (startPowerUpSequence(&mmap, &cartridge)) {
+		char gameTitle[17];
+		for (uint8_t i = 0; i < 17; ++i) {
+			gameTitle[i] = cartridge.title[i];
+		}
+		while (cpu.PC != 0x000C)
+		{
+			executeCPUInstruction(&cpu, &mmap);
+			//usleep(16);
+		}
+		fprintf(stdout, "BIOS executed\n");
 		renderFrame(&ppu, gameTitle);
-		usleep(16);
 	}
 
+	while (!proccessInput()) {
+	}
 
 	finalizePPU(&ppu);
+	finalizeCartridge(&cartridge);
 
 	return EXIT_SUCCESS;
 }

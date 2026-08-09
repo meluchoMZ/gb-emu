@@ -71,6 +71,7 @@ void writeMemory(struct MMAP *mmap, uint16_t address, uint8_t data)
 		// Handle writes to IO registers
 		case R_BOOT_ROM_MAPPING:
 			mmap->bootRomEnabled = false;
+			fprintf(mmap->logFile, "[MEMORY] BIOS ROM bank unbanked\n");
 			mmap->memoryBuffer[address] = data;
 			return;
 		default:

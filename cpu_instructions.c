@@ -207,7 +207,7 @@ void op0x20(struct CPU *cpu, struct MMAP *mmap)
 	// JR NZ, e
 	// Conditional relative jump to e if NZ is met
 	cpu->PC++;
-	uint8_t offset = readMemory(mmap, cpu->PC++);
+	int8_t offset = readMemory(mmap, cpu->PC++);
 	if (!cpu->F.Z) {
 		cpu->PC = cpu->PC + offset;
 	}
