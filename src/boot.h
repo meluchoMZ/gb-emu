@@ -6,8 +6,8 @@
 #ifndef __BOOT_H
 #define __BOOT_H
 
-#include "cartridge.h"
-#include "memory.h"
+#include "peripherals/cartridge.h"
+#include "soc/memory.h"
 
 #include <stdbool.h>
 

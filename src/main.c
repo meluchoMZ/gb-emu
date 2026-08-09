@@ -4,12 +4,12 @@
  */
 
 #include "boot.h"
-#include "cartridge.h"
-#include "cpu.h"
-#include "cpu_instructions.h"
+#include "peripherals/cartridge.h"
+#include "soc/cpu.h"
+#include "soc/cpu_instructions.h"
 #include "io.h"
-#include "memory.h"
-#include "ppu.h"
+#include "soc/memory.h"
+#include "video/ppu.h"
 
 #include <stdbool.h>
 #include <stdio.h>

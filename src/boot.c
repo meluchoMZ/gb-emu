@@ -4,8 +4,8 @@
  */
 
 #include "boot.h"
-#include "cartridge.h"
-#include "memory.h"
+#include "peripherals/cartridge.h"
+#include "soc/memory.h"
 
 #include <errno.h>
 #include <stdlib.h>

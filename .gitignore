@@ -1,7 +1,3 @@
-test.c
-test.cpp
-test2.cpp
-gb-emu
-gb_rom_linear
-gb_tile_viewer
 roms/
+gb
+gbtest
