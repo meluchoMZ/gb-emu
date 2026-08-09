@@ -38,7 +38,7 @@ bool initPPU(struct PPU *ppu, FILE *logFile)
 
 	ppu->window = SDL_CreateWindow("GBemu",
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			SCREEN_WIDTH * SCALE_FACTOR, SCREEN_HEIGHT * SCALE_FACTOR, 
+			SCREEN_WIDTH, SCREEN_HEIGHT, 
 			windowFlags);
 
 	if (ppu->window == NULL) {
@@ -55,25 +55,12 @@ bool initPPU(struct PPU *ppu, FILE *logFile)
 
 	fprintf(ppu->logFile, "Initializing pixel buffer with size %ld:\n", sizeof(uint32_t[computedWidth][computedHeight]));
 	ppu->pixelBuffer = malloc(computedWidth * computedHeight * sizeof(uint32_t));
-	for (int i = 0; i < computedWidth; ++i) {
-		for (int j = 0; j < computedHeight; ++j) {
-			if (i < computedWidth/2 && j < computedHeight/2)
-				ppu->pixelBuffer[computedWidth * j + i] = TILE_WHITE;
-			if (i < computedWidth/2 && j > computedHeight/2)
-				ppu->pixelBuffer[computedWidth * j + i] = TILE_DARK_GRAY;
-			if (i > computedWidth/2 && j < computedHeight/2)
-				ppu->pixelBuffer[computedWidth * j + i] = TILE_LIGHT_GRAY;
-			if (i > computedWidth/2 && j > computedHeight/2)
-				ppu->pixelBuffer[computedWidth * j + i] = TILE_BLACK;
-		}
-	}
+
 
 	ppu->debugWindow = SDL_CreateWindow("Tile VRAM Debug",
 			// offset by 20 pixels to the left of the emulator window
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			TILE_DEBUG_WINDOW_WIDTH * SCALE_FACTOR,
-			TILE_DEBUG_WINDOW_HEIGHT * SCALE_FACTOR, 
-			0);
+			TILE_DEBUG_WINDOW_WIDTH, TILE_DEBUG_WINDOW_HEIGHT, 0);
 
 	if (ppu->debugWindow == NULL) {
 		fprintf(ppu->logFile, "Error creating SDL window (debug): %s\n", SDL_GetError());
@@ -97,6 +84,7 @@ void finalizePPU(struct PPU *ppu)
 	}
 
 	free(ppu->pixelBuffer);
+	ppu->pixelBuffer = NULL;
 	
 	if (ppu->renderer != NULL) {
 		SDL_DestroyRenderer(ppu->renderer);
@@ -129,6 +117,65 @@ void updateFramesPerSecond(struct PPU *ppu, const char * gameTitle)
 		ppu->fps = 0;
 	}
 	return;
+}
+
+uint32_t convertToTileColorCode(uint8_t tileColorCode)
+{
+	switch (tileColorCode)
+	{
+		case 0x00:
+			return TILE_WHITE;
+		case 0x01:
+			return TILE_LIGHT_GRAY;
+		case 0x10:
+			return TILE_DARK_GRAY;
+		case 0x11:
+			return TILE_BLACK;
+		default:
+			fprintf(stderr, "[PPU] Cannot find tile color code for value %02hhx\n", tileColorCode);
+			return 0x00000000;
+	}
+}
+
+uint16_t decode2BPPGraphics(const uint8_t highByte, const uint8_t lowByte)
+{
+	uint16_t decodedValue = 0x00;
+	for (uint8_t i = 0; i < 8; ++i)
+	{
+		uint8_t bitIndex = 7 - i;
+		uint16_t highByteBitValue = (highByte >> bitIndex) & 0x0001;
+		uint16_t lowByteBitValue  = (lowByte  >> bitIndex) & 0x0001;
+		uint16_t value = ((highByteBitValue << 1) | lowByteBitValue) & 0x0003;
+		decodedValue |= value << (i << 1);
+	}
+	return decodedValue;
+}
+
+void renderDebugTileInfo(struct PPU *ppu)
+{
+	int texturePitch = 0;
+	void *texturePixels = NULL;
+	SDL_Texture *texture = SDL_CreateTexture(ppu->renderer, 
+			SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
+			TILE_DEBUG_WINDOW_WIDTH,
+			TILE_DEBUG_WINDOW_HEIGHT);
+	if (texture == NULL) {
+		fprintf(ppu->logFile, "[PPU] Error creating texture: %s\n", SDL_GetError());
+		return;
+	}
+
+	if (SDL_LockTexture(texture, NULL, &texturePixels, &texturePitch) == 0) {
+		// decode tiles and write them to the texture
+	} else {
+		fprintf(ppu->logFile, "Unable to lock texture: %s\n", SDL_GetError());
+		SDL_DestroyTexture(texture);
+		return;
+	}
+	SDL_UnlockTexture(texture);
+	SDL_RenderClear(ppu->debugRenderer);
+	SDL_RenderCopy(ppu->debugRenderer, texture, NULL, NULL);
+	SDL_RenderPresent(ppu->debugRenderer);
+	SDL_DestroyTexture(texture);
 }
 
 void renderFrame(struct PPU *ppu, const char *gameTitle)

@@ -15,7 +15,7 @@
 #define SCREEN_BUFFER_HEIGHT 256
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
-#define SCALE_FACTOR 4 // scale it up to 4 on testing
+#define SCALE_FACTOR 1 // scale it up to 4 on testing
 
 // Tile color code
 #define TILE_WHITE      0xFFFFFFFF
@@ -23,8 +23,12 @@
 #define TILE_DARK_GRAY  0xFF555555
 #define TILE_BLACK      0xFF000000
 
-#define TILE_DEBUG_WINDOW_WIDTH 24
-#define TILE_DEBUG_WINDOW_HEIGHT 16
+#define TILE_WIDTH 8
+
+// There are 2 32x32 tile maps
+// 256x256 pixels each
+#define TILE_DEBUG_WINDOW_WIDTH 256
+#define TILE_DEBUG_WINDOW_HEIGHT 512
 
 /**
  * Defines the PixelProccessingUnit
@@ -86,24 +90,37 @@ struct AttributeEntry
 	} flags;
 };
 
+/**
+ * 64 pixels tile
+ */
+typedef uint8_t Tile[8][8];
+
 
 /**
  * Initializes all PPU subsystems
- * @param ppu a PPU pointer to the logFile
- * @return 1 if error, 0 if success
+ * @param ppu a pointer to a struct PPU
+ * @param logFile a FILE pointer to the desired log file
  */
 bool initPPU(struct PPU *ppu, FILE *logFile);
 
 /**
+ * Renders the two tile maps for debuggin purposes
+ * @param ppu a pointer to a struct PPU
+ */
+void renderDebugTileInfo(struct PPU *ppu);
+
+uint16_t decode2BPPGraphics(const uint8_t highByte, const uint8_t lowByte);
+
+/**
  * Renders a frame
- * @param ppu a pointer to the ppu 
+ * @param ppu a pointer to a struct PPU
  */
 void renderFrame(struct PPU *ppu, const char *gameTitle);
 
 
 /**
  * Ends the PPU execution liberating all its resources
- * @param ppu a pointer to a non null ppu 
+ * @param ppu a pointer to a struct PPU
  */
 void finalizePPU(struct PPU *ppu);
 
