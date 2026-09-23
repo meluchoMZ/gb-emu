@@ -49,7 +49,7 @@ bool initMemoryMap(struct MMAP *mmap, FILE *logFile)
 uint8_t readMemory(struct MMAP *mmap, uint16_t address)
 {
 	// the boot room is a switchable bank
-	if (mmap->bootRomEnabled) {
+	if (address < 256 &&  mmap->bootRomEnabled) {
 		return mmap->bootRom[address];
 	}
 	switch (address)
