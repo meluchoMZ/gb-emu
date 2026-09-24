@@ -46,14 +46,13 @@ void op0x08(struct CPU *cpu, struct MMAP *mmap)
 	// LD (nn), SP
 	// Loads to the address nn the data from the SP
 	cpu->PC++;
-	uint8_t newSpLsb = readMemory(mmap, cpu->PC++);
-	uint8_t newSpMsb = readMemory(mmap, cpu->PC++);
-	uint16_t newSP = (((uint16_t) newSpMsb) << 8) | newSpLsb;
+	uint8_t addressLsb = readMemory(mmap, cpu->PC++);
+	uint8_t addressMsb = readMemory(mmap, cpu->PC++);
 	// write Least Significant Bits
-	writeMemory(mmap, newSP++, cpu->SP & 0x00FF);
+	uint16_t targetAddress = ((uint16_t) addressMsb) << 8 | addressLsb;
+	writeMemory(mmap, targetAddress++, cpu->SP & 0x00FF);
 	// write Most Significant Bits
-	writeMemory(mmap, newSP, (cpu->SP & 0xFF00) >> 8);
-	cpu->PC++;
+	writeMemory(mmap, targetAddress, (cpu->SP & 0xFF00) >> 8);
 }
 
 void op0x0B(struct CPU *cpu, struct MMAP *mmap)
