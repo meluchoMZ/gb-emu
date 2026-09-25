@@ -4,6 +4,7 @@
  */
 
 #include "arith_utils.h"
+#include "bin_utils.h"
 #include "cpu.h"
 #include "cpu_instructions.h"
 #include "memory.h"
@@ -49,10 +50,10 @@ void op0x08(struct CPU *cpu, struct MMAP *mmap)
 	uint8_t addressLsb = readMemory(mmap, cpu->PC++);
 	uint8_t addressMsb = readMemory(mmap, cpu->PC++);
 	// write Least Significant Bits
-	uint16_t targetAddress = ((uint16_t) addressMsb) << 8 | addressLsb;
-	writeMemory(mmap, targetAddress++, cpu->SP & 0x00FF);
+	uint16_t targetAddress = toUint16(addressMsb, addressLsb);
+	writeMemory(mmap, targetAddress++, lsb(cpu->SP));
 	// write Most Significant Bits
-	writeMemory(mmap, targetAddress, (cpu->SP & 0xFF00) >> 8);
+	writeMemory(mmap, targetAddress, msb(cpu->SP));
 }
 
 void op0x0B(struct CPU *cpu, struct MMAP *mmap)
@@ -115,7 +116,7 @@ void op0x11(struct CPU *cpu, struct MMAP *mmap)
 	cpu->PC++;
 	uint8_t dataLsb = readMemory(mmap, cpu->PC++);
 	uint8_t dataMsb = readMemory(mmap, cpu->PC++);
-	uint16_t data = (((uint16_t) dataMsb) << 8) | dataLsb;
+	uint16_t data = toUint16(dataMsb, dataLsb);
 	cpu->DE = data;
 }
 
@@ -178,7 +179,7 @@ void op0x21(struct CPU *cpu, struct MMAP *mmap)
 	cpu->PC++;
 	uint8_t lsbData = readMemory(mmap, cpu->PC++);
 	uint8_t msbData = readMemory(mmap, cpu->PC++);
-	cpu->HL = (((uint16_t) msbData) << 8) | lsbData;
+	cpu->HL = toUint16(msbData, lsbData);
 }
 
 void op0x26(struct CPU *cpu, struct MMAP *mmap)
@@ -199,7 +200,7 @@ void op0x31(struct CPU *cpu, struct MMAP *mmap)
 	cpu->PC++;
 	uint8_t newSpLsb = readMemory(mmap, cpu->PC++);
 	uint8_t newSpMsb = readMemory(mmap, cpu->PC++);
-	cpu->SP = (((uint16_t) newSpMsb) << 8) | newSpLsb;
+	cpu->SP = toUint16(newSpMsb, newSpLsb);
 }
 
 void op0x32(struct CPU *cpu, struct MMAP *mmap)
@@ -536,7 +537,7 @@ void op0xE0(struct CPU *cpu, struct MMAP *mmap)
 	// Load from accumulator to 0xFF00 + n
 	cpu->PC++;
 	uint8_t n = readMemory(mmap, cpu->PC++);
-	writeMemory(mmap, 0xFF00 | n, cpu->A);
+	writeMemory(mmap, toUint16(0xFF, n), cpu->A);
 }
 
 void op0xE1(struct CPU *cpu, struct MMAP *mmap)
@@ -545,7 +546,7 @@ void op0xE1(struct CPU *cpu, struct MMAP *mmap)
 	// Pops data from the stack memory to HL register
 	uint8_t lsb = readMemory(mmap, cpu->SP++);
 	uint8_t msb = readMemory(mmap, cpu->SP++);
-	cpu->HL = (((uint16_t) msb) << 8) | lsb;
+	cpu->HL = toUint16(msb, lsb);
 	cpu->PC++;
 }
 
@@ -555,7 +556,7 @@ void op0xE2(struct CPU *cpu, struct MMAP *mmap)
 	// Loads into memory the value from A into 0xFF00 + C offset
 	cpu->PC++;
 	uint8_t offset = readMemory(mmap, cpu->PC++);
-	writeMemory(mmap, 0xFF00 | offset, cpu->A);
+	writeMemory(mmap, toUint16(0xFF, offset), cpu->A);
 }
 
 void op0xE6(struct CPU *cpu, struct MMAP *mmap)

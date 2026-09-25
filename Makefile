@@ -3,13 +3,13 @@
 TARGET = gb
 TEST_TARGET = gbtest
 
-SRC_ALU = src/soc/cpu.c src/soc/arith_utils.c src/soc/cpu_instructions.c
+SRC_ALU = src/soc/cpu.c src/soc/arith_utils.c src/soc/bin_utils.c src/soc/cpu_instructions.c
 SRC_MEMORY = src/soc/memory.c
 SRC_PERIPHERALS = src/peripherals/cartridge.c
 SRC_VIDEO = src/video/ppu.c
 SRC = src/io.c $(SRC_PERIPHERALS) $(SRC_VIDEO) $(SRC_MEMORY) $(SRC_ALU) src/boot.c src/main.c
 
-TEST_SRC = src/soc/arith_utils.c test/soc/arith_utils.c src/soc/memory.c test/soc/memory.c src/soc/cpu.c src/soc/cpu_instructions.c test/soc/cpu.c test/soc/instructions/utils.c test/soc/instructions/load.c test/soc/instructions/misc.c
+TEST_SRC = src/soc/bin_utils.c test/soc/bin_utils.c src/soc/arith_utils.c test/soc/arith_utils.c src/soc/memory.c test/soc/memory.c src/soc/cpu.c src/soc/cpu_instructions.c test/soc/cpu.c test/soc/instructions/utils.c test/soc/instructions/load.c test/soc/instructions/misc.c
 
 CC = gcc
 
