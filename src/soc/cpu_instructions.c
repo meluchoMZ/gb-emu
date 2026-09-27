@@ -38,8 +38,7 @@ void op0x06(struct CPU *cpu, struct MMAP *mmap)
 	// LD B, n
 	// Loads the data n into B register
 	cpu->PC++;
-	uint8_t n = readMemory(mmap, cpu->PC++);
-	cpu->B = n;
+	cpu->B = readMemory(mmap, cpu->PC++);
 }
 
 void op0x08(struct CPU *cpu, struct MMAP *mmap)
@@ -293,7 +292,7 @@ void op0x73(struct CPU *cpu, struct MMAP *mmap)
 
 void op0x77(struct CPU *cpu, struct MMAP *mmap)
 {
-	// LD HL, A
+	// LD (HL), A
 	// Loads the data A into memory at address pointed by HL
 	writeMemory(mmap, cpu->HL, cpu->A);
 	cpu->PC++;
@@ -555,8 +554,7 @@ void op0xE2(struct CPU *cpu, struct MMAP *mmap)
 	// LDH (C), A
 	// Loads into memory the value from A into 0xFF00 + C offset
 	cpu->PC++;
-	uint8_t offset = readMemory(mmap, cpu->PC++);
-	writeMemory(mmap, toUint16(0xFF, offset), cpu->A);
+	writeMemory(mmap, toUint16(0xFF, cpu->C), cpu->A);
 }
 
 void op0xE6(struct CPU *cpu, struct MMAP *mmap)
