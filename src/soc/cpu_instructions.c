@@ -72,8 +72,8 @@ void op0x0C(struct CPU *cpu, struct MMAP *mmap)
 	cpu->F.C = compute8BitCarry(cpu->C, 0x01);
 	cpu->F.H = compute8BitHalfCarry(cpu->C, 0x01);
 	cpu->C++;
-	cpu->F.Z = cpu->C == 0x00;
-	cpu->F.N = 0;
+	cpu->F.Z = cpu->C == 0x00 ? 0b1 : 0b0;
+	cpu->F.N = 0b0;
 	cpu->PC++;
 }
 
@@ -84,8 +84,9 @@ void op0x0D(struct CPU *cpu, struct MMAP *mmap)
 	IGNORE(mmap);
 	cpu->F.C = compute8BitBorrowing(cpu->C, 0x01);	
 	cpu->F.H = compute8BitHalfBitBorrowing(cpu->C, 0x01);
-	cpu->F.N = 1;
+	cpu->F.N = 0b1;
 	cpu->C--;
+	cpu->F.Z = cpu->C == 0b0 ? 0b1 : 0b0;
 	cpu->PC++;
 }
 
@@ -124,12 +125,13 @@ void op0x17(struct CPU *cpu, struct MMAP *mmap)
 	// RLA
 	// Rotates the accumulator left through the carry flag
 	IGNORE(mmap);
+	uint8_t oldA = cpu->A;
 	cpu->A = cpu->A << 1;
-	cpu->A = cpu->A | (cpu->F.C & 0x01);
-	cpu->F.Z = 0;
-	cpu->F.N = 0;
-	cpu->F.H = 0;
-	cpu->F.C = (cpu->A >> 8) & 0x01;
+	cpu->A = cpu->A | (cpu->F.C & 0b1);
+	cpu->F.Z = 0b0;
+	cpu->F.N = 0b0;
+	cpu->F.H = 0b0;
+	cpu->F.C = (oldA & 0x80) > 0;
 	cpu->PC++;
 }
 
@@ -147,14 +149,12 @@ void op0x1F(struct CPU *cpu, struct MMAP *mmap)
 	// RRA
 	// Rotates A register right through the carry flag
 	IGNORE(mmap);
-	uint8_t carryValue = cpu->F.C & 0x01;
+	uint8_t carryValue = cpu->F.C;
 	cpu->F.C = cpu->A & 0x01;
-	cpu->A = cpu->A >> 1;
-	cpu->A = cpu->A | (carryValue << 7);
+	cpu->A = (cpu->A >> 1) | (carryValue << 7);
 	cpu->F.Z = 0x0;
 	cpu->F.N = 0x0;
 	cpu->F.H = 0x0;
-	cpu->F.C = carryValue;
 	cpu->PC++;
 }
 
