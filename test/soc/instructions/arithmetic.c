@@ -203,3 +203,225 @@ TEST(ArithmeticAndLogicalOperations, op0x83_CarriesAndZero, "ADD E - Adds the va
 	cpu.F.Z = 0b0;
 	assertCPUEquals(expected, cpu);
 }
+
+TEST(ArithmeticAndLogicalOperations, op0x88, "ADC B - adds A + B + carry value")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.B = 0x02;
+	cpu.A = 0x01;
+	cpu.F.C = 0b1;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x8, 0x8);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0x04, cpu.A);
+	ASSERT_TRUE(0b0 == cpu.F.C);
+	ASSERT_TRUE(0b0 == cpu.F.H);
+	ASSERT_TRUE(0b0 == cpu.F.Z);
+	ASSERT_TRUE(0b0 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.C = 0b1;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0x88_WithCarryAndZero, "ADC B - adds A + B + carry value, carry = 0b1")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.B = 0xFE;
+	cpu.A = 0x01;
+	cpu.F.C = 0b1;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x8, 0x8);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0x00, cpu.A);
+	ASSERT_TRUE(0b1 == cpu.F.C);
+	ASSERT_TRUE(0b1 == cpu.F.H);
+	ASSERT_TRUE(0b1 == cpu.F.Z);
+	ASSERT_TRUE(0b0 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.H = 0b0;
+	cpu.F.Z = 0b0;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0x89, "ADC C - adds A + C + carry value")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.C = 0x02;
+	cpu.A = 0x01;
+	cpu.F.C = 0b1;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x8, 0x9);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0x04, cpu.A);
+	ASSERT_TRUE(0b0 == cpu.F.C);
+	ASSERT_TRUE(0b0 == cpu.F.H);
+	ASSERT_TRUE(0b0 == cpu.F.Z);
+	ASSERT_TRUE(0b0 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.C = 0b1;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0x89_WithCarryAndZero, "ADC C - adds A + C + carry value, carry = 0b1")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.C = 0xFE;
+	cpu.A = 0x01;
+	cpu.F.C = 0b1;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x8, 0x9);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0x00, cpu.A);
+	ASSERT_TRUE(0b1 == cpu.F.C);
+	ASSERT_TRUE(0b1 == cpu.F.H);
+	ASSERT_TRUE(0b1 == cpu.F.Z);
+	ASSERT_TRUE(0b0 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.H = 0b0;
+	cpu.F.Z = 0b0;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0x99, "SBC C - substracts A - C - carry value")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.C = 0x03;
+	cpu.A = 0x06;
+	cpu.F.C = 0b1;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x9, 0x9);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0x02, cpu.A);
+	ASSERT_TRUE(0b0 == cpu.F.C);
+	ASSERT_TRUE(0b0 == cpu.F.H);
+	ASSERT_TRUE(0b0 == cpu.F.Z);
+	ASSERT_TRUE(0b1 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.C = 0b1;
+	cpu.F.N = 0b0;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0x99_WithCarry, "SBC C - substracts A - C - carry value, carry = 0b1")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.C = 0x10;
+	cpu.A = 0x10;
+	cpu.F.C = 0b1;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x9, 0x9);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0xFF, cpu.A);
+	ASSERT_TRUE(0b1 == cpu.F.C);
+	ASSERT_TRUE(0b1 == cpu.F.H);
+	ASSERT_TRUE(0b0 == cpu.F.Z);
+	ASSERT_TRUE(0b1 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.H = 0b0;
+	cpu.F.Z = 0b0;
+	cpu.F.N = 0b0;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0x99_Zero, "SBC C - substracts A - C - carry value, equals zero")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.C = 0x10;
+	cpu.A = 0x10;
+	cpu.F.C = 0b0;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x9, 0x9);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0x00, cpu.A);
+	ASSERT_TRUE(0b0 == cpu.F.C);
+	ASSERT_TRUE(0b0 == cpu.F.H);
+	ASSERT_TRUE(0b1 == cpu.F.Z);
+	ASSERT_TRUE(0b1 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.Z = 0b0;
+	cpu.F.N = 0b0;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0x9F_Zero, "SBC A - substracts A - A - carry value")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.A = 0x06;
+	cpu.F.C = 0b0;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x9, 0xF);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0x00, cpu.A);
+	ASSERT_TRUE(0b0 == cpu.F.C);
+	ASSERT_TRUE(0b0 == cpu.F.H);
+	ASSERT_TRUE(0b1 == cpu.F.Z);
+	ASSERT_TRUE(0b1 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.N = 0b0;
+	cpu.F.Z = 0b0;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0x9F_MinusOne, "ADC C - adds A + C + carry value, carry = 0b1")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.A = 0x10;
+	cpu.F.C = 0b1;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0x9, 0xF);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0xFF, cpu.A);
+	ASSERT_TRUE(0b1 == cpu.F.C);
+	ASSERT_TRUE(0b1 == cpu.F.H);
+	ASSERT_TRUE(0b0 == cpu.F.Z);
+	ASSERT_TRUE(0b1 == cpu.F.N);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.H = 0b0;
+	cpu.F.Z = 0b0;
+	cpu.F.N = 0b0;
+	assertCPUEquals(expected, cpu);
+}
+
+TEST(ArithmeticAndLogicalOperations, op0xAF, "XOR A - XOR between A register and A register, updates A register")
+{
+	INIT_ENV;
+	cpu.PC = 0x1000;
+	cpu.A = 0b10011110;
+	uint16_t oldPC = cpu.PC;
+	uint8_t oldA = cpu.A;
+	EXEC(0xA, 0xF);
+	ASSERT_16_BIT_UNSIGNED_INT_EQUALS(0x1001, cpu.PC);
+	ASSERT_8_BIT_UNSIGNED_INT_EQUALS(0x00, cpu.A);
+	ASSERT_TRUE(0b1 == cpu.F.Z);
+	cpu.PC = oldPC;
+	cpu.A = oldA;
+	cpu.F.Z = 0b0;
+	assertCPUEquals(expected, cpu);
+}

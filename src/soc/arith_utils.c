@@ -13,9 +13,19 @@ bool compute8BitCarry(uint8_t a, uint8_t b)
 	return ((uint16_t) a + (uint16_t) b) > 0xFF;
 }
 
+bool compute8BitCarryWithCarry(uint8_t a, uint8_t b, uint8_t carry)
+{
+	return ((uint16_t) a + (uint16_t) b + (uint16_t) carry) > 0xFF;
+}
+
 bool compute8BitHalfCarry(uint8_t a, uint8_t b)
 {
 	return ((a & 0x0F) + (b & 0x0F)) > 0x0F;
+}
+
+bool compute8BitHalfCarryWithCarry(uint8_t a, uint8_t b, uint8_t carry)
+{
+	return ((a & 0x0F) + (b & 0x0F) + (carry & 0x01)) > 0x0F;
 }
 
 bool compute8BitBorrowing(uint8_t a, uint8_t b)
@@ -23,9 +33,19 @@ bool compute8BitBorrowing(uint8_t a, uint8_t b)
 	return a < b;
 }
 
+bool compute8BitBorrowingWithCarry(uint8_t a, uint8_t b, uint8_t carry)
+{
+	return ((uint16_t) a) < ((uint16_t) b + (uint16_t) carry);
+}
+
 bool compute8BitHalfBitBorrowing(uint8_t a, uint8_t b)
 {
 	return (a & 0x0F) < (b & 0x0F);
+}
+
+bool compute8BitHalfBitBorrowingWithCarry(uint8_t a, uint8_t b, uint8_t carry)
+{
+	return (a & 0x0F) < ((b & 0x0F) + carry);
 }
 
 bool compute16BitCarry(uint16_t a, uint16_t b)

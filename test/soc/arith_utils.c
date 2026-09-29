@@ -42,6 +42,20 @@ TEST(CarryUtils, compute8BitCarryTotalMaxint, "Computes 8 bit carry between maxi
 	ASSERT_FALSE(compute8BitCarry(a, b));
 }
 
+TEST(CarryUtils, compute8BitCarryWithCarryDoesntCarry, "Computes 8 bit carry and a carry without generating carry bit")
+{
+	uint8_t a = 0xF0;
+	uint8_t b = 0x0E;
+	ASSERT_FALSE(compute8BitCarryWithCarry(a, b, 0b1));
+}
+
+TEST(CarryUtils, compute8BitCarryWithCarryCarries, "Computes 8 bit carry and a carry generating carry bit")
+{
+	uint8_t a = 0xFE;
+	uint8_t b = 0xFE;
+	ASSERT_TRUE(compute8BitCarryWithCarry(a, b, 0b1));
+}
+
 TEST(CarryUtils, compute8BitHalfCarryCarries, "Computes 8 bit sumn that should generate a half carry bit")
 {
 	uint8_t a = 0x08;
@@ -53,6 +67,20 @@ TEST(CarryUtils, compute8BitHalfCarryDoesntCarry, "Computes 8 bit sum that shoul
 	uint8_t a = 0x0F;
 	uint8_t b = 0x00;
 	ASSERT_FALSE(compute8BitHalfCarry(a, b));
+}
+
+TEST(CarryUtils, compute8BitHalfCarryWithCarryCarries, "Computes 8 bit sumn that should generate a half carry bit with a input carry")
+{
+	uint8_t a = 0x08;
+	uint8_t b = 0x07;
+	ASSERT_TRUE(compute8BitHalfCarryWithCarry(a, b, 0b1));
+}
+
+TEST(CarryUtils, compute8BitHalfCarryWithCarryDoesntCarry, "Computes 8 bit sum that should not generate a half carry bit with a input carry")
+{
+	uint8_t a = 0x0E;
+	uint8_t b = 0x00;
+	ASSERT_FALSE(compute8BitHalfCarryWithCarry(a, b, 0b1));
 }
 
 TEST(CarryUtils, compute8BitHalfCarryBiggerThan16, "Computes 8 bit sum that should generate a half carry bit when both operands are bigger than 0x10")
@@ -90,6 +118,19 @@ TEST(CarryUtils, compute8BitBorrowingDoesntBorrowZero, "Computes 8 bit substract
 	ASSERT_FALSE(compute8BitBorrowing(a, b));
 }
 
+TEST(CarryUtils, compute8BitBorrowingWithCarryBorrows, "Computes 8 bit substraction that should generate bit borrowing with input carry")
+{
+	uint8_t a = 0x02;
+	ASSERT_TRUE(compute8BitBorrowingWithCarry(a, a, 0b1));
+}
+
+TEST(CarryUtils, compute8BitBorrowingWithCarryDoesntBorrow, "Computes 8 bit substraction that should not generate bit borrowing with input carry")
+{
+	uint8_t a = 0x06;
+	uint8_t b = 0x02;
+	ASSERT_FALSE(compute8BitBorrowingWithCarry(a, b, 0b1));
+}
+
 TEST(CarryUtils, compute8BitHalfBitBorrowingBorrows, "Computes 8 bit substraction that should generate half bit borrowing")
 {
 	uint8_t a = 0x12;
@@ -109,6 +150,20 @@ TEST(CarryUtils, compute8BitHalfBitBorrowingDoesntBorrow, "Computes 8 bit substr
 	uint8_t a = 0x28;
 	uint8_t b = 0x13;
 	ASSERT_FALSE(compute8BitHalfBitBorrowing(a, b));
+}
+
+TEST(CarryUtils, compute8BitHalfBitBorrowingWithCarryBorrows, "Computes 8 bit substraction that should generate half bit borrowing with input carry")
+{
+	uint8_t a = 0x12;
+	uint8_t b = 0x04;
+	ASSERT_TRUE(compute8BitHalfBitBorrowingWithCarry(a, b, 0b1));
+}
+
+TEST(CarryUtils, compute8BitHalfBitBorrowingWithCarryDoesntBorrow, "Computes 8 bit substraction that should not generate half bit borrowing with input carry")
+{
+	uint8_t a = 0x28;
+	uint8_t b = 0x12;
+	ASSERT_FALSE(compute8BitHalfBitBorrowingWithCarry(a, b, 0b1));
 }
 
 /** 16 bit carry utils **/

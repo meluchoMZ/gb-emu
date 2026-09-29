@@ -318,13 +318,13 @@ void op0x88(struct CPU *cpu, struct MMAP *mmap)
 	// ADC B
 	// Add to register A the value in register B and carry
 	IGNORE(mmap);
-	uint8_t carryValue = compute8BitCarry(cpu->A, cpu->B + cpu->F.C) & 0x01;
-	uint8_t halfCarryValue = compute8BitHalfCarry(cpu->A, cpu->B + cpu->F.C) & 0x01;
+	uint8_t carryValue = compute8BitCarryWithCarry(cpu->A, cpu->B, cpu->F.C) ? 0b1 : 0b0;
+	uint8_t halfCarryValue = compute8BitHalfCarryWithCarry(cpu->A, cpu->B, cpu->F.C) ? 0b1 : 0b0;
 	cpu->A += cpu->B + cpu->F.C;
 	cpu->F.C = carryValue;
 	cpu->F.H = halfCarryValue;
-	cpu->F.N = 0x0;
-	cpu->F.Z = cpu->A == 0x00;
+	cpu->F.N = 0b0;
+	cpu->F.Z = cpu->A == 0x00 ? 0b1 : 0b0;
 	cpu->PC++;
 }
 
@@ -333,13 +333,13 @@ void op0x89(struct CPU *cpu, struct MMAP *mmap)
 	// ADC C
 	// Add to the register A the value in register C and carry
 	IGNORE(mmap);
-	uint8_t carryValue = compute8BitCarry(cpu->A, cpu->C + cpu->F.C) & 0x01;
-	uint8_t halfCarryValue = compute8BitHalfCarry(cpu->A, cpu->C + cpu->F.C) & 0x01;
+	uint8_t carryValue = compute8BitCarry(cpu->A, cpu->C + cpu->F.C) ? 0b1 : 0b0;
+	uint8_t halfCarryValue = compute8BitHalfCarry(cpu->A, cpu->C + cpu->F.C) ? 0b1 : 0b0;
 	cpu->A += cpu->C + cpu->F.C;
 	cpu->F.C = carryValue;
 	cpu->F.H = halfCarryValue;
-	cpu->F.N = 0x0;
-	cpu->F.Z = cpu->A == 0x00;
+	cpu->F.N = 0b0;
+	cpu->F.Z = cpu->A == 0x00 ? 0b1 : 0b0;
 	cpu->PC++;
 }
 
@@ -350,11 +350,11 @@ void op0x99(struct CPU *cpu, struct MMAP *mmap)
 	// SBC C
 	// Substracts from register A, the carry and the value in the C register
 	IGNORE(mmap);
-	uint8_t carryValue = compute8BitBorrowing(cpu->A, cpu->C - cpu->F.C) & 0x01;
-	uint8_t halfCarryValue = compute8BitHalfBitBorrowing(cpu->A, cpu->C - cpu->F.C) & 0x01;
+	uint8_t carryValue = compute8BitBorrowingWithCarry(cpu->A, cpu->C, cpu->F.C) ? 0b1 : 0b0;
+	uint8_t halfCarryValue = compute8BitHalfBitBorrowingWithCarry(cpu->A, cpu->C, cpu->F.C) ? 0b1 : 0b0;
 	cpu->A = cpu->A - cpu->C - cpu->F.C;
-	cpu->F.Z = cpu->A == 0x00;
-	cpu->F.N = 1;
+	cpu->F.Z = cpu->A == 0x00 ? 0b1 : 0b0;
+	cpu->F.N = 0b1;
 	cpu->F.H = halfCarryValue;
 	cpu->F.C = carryValue;
 	cpu->PC++;
@@ -363,13 +363,13 @@ void op0x99(struct CPU *cpu, struct MMAP *mmap)
 void op0x9F(struct CPU *cpu, struct MMAP *mmap)
 {
 	// SBC A
-	// Substracts from register A, the carry and the value in the C register
+	// Substracts from register A, the carry and the value in the A register
 	IGNORE(mmap);
-	uint8_t carryValue = compute8BitBorrowing(cpu->A, cpu->A - cpu->F.C) & 0x01;
-	uint8_t halfCarryValue = compute8BitHalfBitBorrowing(cpu->A, cpu->A - cpu->F.C) & 0x01;
+	uint8_t carryValue = compute8BitBorrowingWithCarry(cpu->A, cpu->A, cpu->F.C) ? 0b1 :0b0;
+	uint8_t halfCarryValue = compute8BitHalfBitBorrowingWithCarry(cpu->A, cpu->A, cpu->F.C) ? 0b1 : 0b0;
 	cpu->A = cpu->A - cpu->A - cpu->F.C;
-	cpu->F.Z = cpu->A == 0x00;
-	cpu->F.N = 1;
+	cpu->F.Z = cpu->A == 0x00 ? 0b1 : 0b0;
+	cpu->F.N = 0b1;
 	cpu->F.H = halfCarryValue;
 	cpu->F.C = carryValue;
 	cpu->PC++;
@@ -381,12 +381,13 @@ void op0xAF(struct CPU *cpu, struct MMAP *mmap)
 {
 	// XOR A
 	// XOR between A register and A register and updates A register
+	// A XOR A is always zero
 	IGNORE(mmap);
-	cpu->A = cpu->A ^ cpu->A;
-	cpu->F.Z = cpu->A == 0;
-	cpu->F.N = 0;
-	cpu->F.H = 0;
-	cpu->F.C = 0;
+	cpu->A = 0x00;
+	cpu->F.Z = 0b1;
+	cpu->F.N = 0b0;
+	cpu->F.H = 0b0;
+	cpu->F.C = 0b0;
 	cpu->PC++;
 }
 
